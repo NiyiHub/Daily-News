@@ -1,35 +1,25 @@
+# fact_checking/views.py
+
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
-from .utils import query_google_fact_check, query_news_api
+from .utils import process_fact_check_manual
 from .models import FactCheckResult
 from .serializers import FactCheckResultSerializer
 
 class FactCheckView(APIView):
     """
-    API View for fact-checking content.
+    API view to manually process fact checking for a given claim.
     """
 
     def post(self, request):
         claim = request.data.get('claim')
-
         if not claim:
             return Response({"error": "Claim is required."}, status=status.HTTP_400_BAD_REQUEST)
-
-        # Query APIs
-        google_result = query_google_fact_check(claim)
-        news_result = query_news_api(claim)
-
-        # Determine overall status
-        final_status = google_result['status'] if google_result['status'] != "Unverified" else news_result['status']
-        evidence = google_result['evidence'] or news_result['evidence']
-
-        # Save result to database
-        fact_check = FactCheckResult.objects.create(
-            claim=claim,
-            status=final_status,
-            evidence=", ".join(evidence) if isinstance(evidence, list) else evidence
-        )
-
-        serializer = FactCheckResultSerializer(fact_check)
-        return Response(serializer.data, status=status.HTTP_200_OK)
+        
+        try:
+            result = process_fact_check_manual(claim)
+            serializer = FactCheckResultSerializer(result)
+            return Response(serializer.data, status=status.HTTP_200_OK)
+        except Exception as e:
+            return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
