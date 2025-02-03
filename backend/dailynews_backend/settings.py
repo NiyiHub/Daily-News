@@ -49,6 +49,7 @@ INSTALLED_APPS = [
     'content_generation',
     'rest_framework',
     'fact_checking',
+    'content_processing',
 ]
 
 MIDDLEWARE = [
