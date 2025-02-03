@@ -1,33 +1,52 @@
 import spacy
+import re
+from collections import Counter
 
 nlp = spacy.load("en_core_web_sm")
 
-def categorize_content(content):
+def categorize_content(text):
     """
-    Categorize content based on keywords and context.
-    Each piece of content is categorized into multiple relevant categories.
+    Categorize content by extracting keywords and matching them to predefined categories.
+    Returns a list of categories.
     """
-    # Define predefined categories and keywords
+    # Predefined mapping of keywords to categories
     categories_keywords = {
-        "AI": ["artificial intelligence", "AI", "machine learning"],
-        "Technology": ["technology", "gadgets", "innovation"],
-        "Politics": ["government", "policy", "elections", "politics"],
+        "AI": ["artificial intelligence", "machine learning", "deep learning", "AI"],
+        "Technology": ["technology", "gadgets", "innovation", "tech"],
+        "Gadgets": ["smartphone", "tablet", "laptop", "gadget"],
+        "Politics": ["government", "election", "policy", "politics"],
         "Health": ["medicine", "health", "wellness", "disease"],
         "Environment": ["climate", "environment", "sustainability"]
     }
 
-    # Tokenize the content and normalize it
-    doc = nlp(content.lower())
+    # Clean and lower the text
+    text_clean = re.sub(r'[^a-zA-Z0-9\s]', ' ', text).lower()
+
+    # Tokenize text using spaCy
+    doc = nlp(text_clean)
     tokens = [token.text for token in doc]
 
-    # Determine categories based on matching keywords
+    # Count token frequencies
+    token_counts = Counter(tokens)
+
     matched_categories = []
     for category, keywords in categories_keywords.items():
-        if any(keyword in tokens for keyword in keywords):
-            matched_categories.append(category)
+        # If any keyword appears in the tokens, add the category
+        for keyword in keywords:
+            if keyword.lower() in tokens:
+                matched_categories.append(category)
+                break  # No need to check other keywords for this category
 
-    # Fallback category if no match
-    if not matched_categories:
-        matched_categories.append("General")
+    # Ensure uniqueness
+    return list(set(matched_categories)) if matched_categories else ["General"]
 
-    return matched_categories
+def tag_content(text):
+    """
+    Extract tags from the text based on named entities using spaCy.
+    Returns a list of tags.
+    """
+    doc = nlp(text)
+    tags = [ent.text for ent in doc.ents]
+    # Return unique tags and limit to a reasonable number, e.g., top 10
+    unique_tags = list(dict.fromkeys(tags))
+    return unique_tags[:10]
