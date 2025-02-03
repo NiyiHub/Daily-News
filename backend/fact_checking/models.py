@@ -1,5 +1,3 @@
-# fact_checking/models.py
-
 from django.db import models
 
 class FactCheckResult(models.Model):

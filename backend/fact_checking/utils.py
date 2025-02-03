@@ -38,8 +38,6 @@ from .models import FactCheckResult
 #     return top_keywords
 
 
-# fact_checking/utils.py 
-
 def query_google_fact_check(claim):
     """
     Query the Google Fact Check Explorer API for the claim.
