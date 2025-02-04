@@ -9,12 +9,10 @@ class FactCheckView(APIView):
     """
     API view to manually process fact checking for a given claim.
     """
-
     def post(self, request):
         claim = request.data.get('claim')
         if not claim:
             return Response({"error": "Claim is required."}, status=status.HTTP_400_BAD_REQUEST)
-        
         try:
             result = process_fact_check_manual(claim)
             serializer = FactCheckResultSerializer(result)

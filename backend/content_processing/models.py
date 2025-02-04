@@ -14,8 +14,8 @@ class ProcessedContent(models.Model):
     and an AI gatekeeping field for publish status.
     """
     content = models.OneToOneField(GeneratedContent, on_delete=models.CASCADE, related_name="processed_content")
-    categories = models.JSONField()  # List of categories (e.g., ["AI", "Technology", "Gadgets"])
-    tags = models.JSONField()        # List of tags extracted from content
+    categories = models.JSONField(default=list, blank=True)  # Provides an empty list by default
+    tags = models.JSONField(default=list, blank=True)
     fact_check_status = models.CharField(max_length=20, editable=False)  # Taken from FactCheckResult
     composite_score = models.FloatField(editable=False, default=0.0)     # Fact-check composite score
     publish_status = models.CharField(max_length=20, choices=PUBLISH_CHOICES, default='published')
