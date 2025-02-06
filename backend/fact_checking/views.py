@@ -7,8 +7,9 @@ from .serializers import FactCheckResultSerializer
 
 class FactCheckView(APIView):
     """
-    API view to manually process fact checking for a given claim.
+    API view for manually processing fact checking using the Google Fact Check API.
     """
+
     def post(self, request):
         claim = request.data.get('claim')
         if not claim:

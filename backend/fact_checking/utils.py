@@ -4,7 +4,15 @@ from .models import FactCheckResult
 
 def query_google_fact_check(claim):
     """
-    Query Google Fact Check Explorer API and return evidence and a score for accuracy.
+    Query the Google Fact Check Explorer API using the given claim.
+    Process the response to extract the textual rating, evidence, and compute a verification score.
+    
+    Returns:
+        dict: {
+            'textual_rating': <str>,
+            'evidence': <evidence details (e.g., URL or list of URLs)>,
+            'verification_score': <float>
+        }
     """
     endpoint = "https://factchecktools.googleapis.com/v1alpha1/claims:search"
     params = {
@@ -15,89 +23,63 @@ def query_google_fact_check(claim):
         response = requests.get(endpoint, params=params)
         response.raise_for_status()
         data = response.json()
+
+        # Default values if no claims found
+        textual_rating = "Unverified"
+        evidence = None
+        verification_score = 0.0
+
         if 'claims' in data and data['claims']:
-            return {"accuracy": 0.9, "evidence": data['claims'][0].get('claimReview', [{}])[0].get('url', "")}
+            # Get the first claimReview if available
+            claim_reviews = data['claims'][0].get('claimReview', [])
+            if claim_reviews:
+                textual_rating = claim_reviews[0].get('textualRating', "Unverified")
+                # Compute a simple verification score based on textual_rating
+                # For example: "TRUE" -> 1.0, "Mostly True" -> 0.8, "Mostly False" -> 0.2, "FALSE" -> 0.0
+                rating_map = {
+                    "TRUE": 1.0,
+                    "Mostly True": 0.8,
+                    "Partly True": 0.5,
+                    "Mostly False": 0.2,
+                    "FALSE": 0.0
+                }
+                verification_score = rating_map.get(textual_rating, 0.0)
+                evidence = claim_reviews[0].get('url', "")
+        return {
+            'textual_rating': textual_rating,
+            'evidence': evidence,
+            'verification_score': verification_score
+        }
     except Exception as e:
+        # Log or print the error as needed
         print("Google Fact Check API error:", e)
-    return {"accuracy": 0.5, "evidence": None}
-
-def query_news_api(claim):
-    """
-    Query NewsAPI for articles related to the claim and return evidence and a source score.
-    """
-    endpoint = "https://newsapi.org/v2/everything"
-    headers = {"Authorization": f"Bearer {settings.NEWS_API_KEY}"}
-    # Use a simple keyword extraction (could be replaced with a more robust method)
-    query_string = claim[:50]
-    params = {
-        "q": query_string,
-        "language": "en",
-        "sortBy": "relevancy",
-        "pageSize": 5
-    }
-    try:
-        response = requests.get(endpoint, headers=headers, params=params)
-        response.raise_for_status()
-        data = response.json()
-        if 'articles' in data and data['articles']:
-            evidence_urls = [article['url'] for article in data['articles'][:3]]
-            return {"source": 0.8, "evidence": evidence_urls}
-    except Exception as e:
-        print("News API error:", e)
-    return {"source": 0.5, "evidence": None}
-
-def process_fact_check_for_content(generated_content):
-    """
-    Process fact-checking for a GeneratedContent instance.
-    Evaluate the claim based on Disclosure, Source, Accuracy, and Clarity.
-    Store evidence from external APIs and compute a composite score.
-    """
-    claim = generated_content.body
-    # For demonstration, dummy scores for Disclosure and Clarity are now placeholders.
-    disclosure_score = 0.8
-    clarity_score = 0.85
-    google_result = query_google_fact_check(claim)
-    news_result = query_news_api(claim)
-    accuracy_score = google_result.get("accuracy", 0.5)
-    source_score = news_result.get("source", 0.5)
-    composite_score = (disclosure_score + source_score + accuracy_score + clarity_score) / 4.0
-    details = {
-        "google_evidence": google_result.get("evidence"),
-        "news_evidence": news_result.get("evidence")
-    }
-    FactCheckResult.objects.create(
-        claim=claim,
-        disclosure_score=disclosure_score,
-        source_score=source_score,
-        accuracy_score=accuracy_score,
-        clarity_score=clarity_score,
-        composite_score=composite_score,
-        details=details
-    )
+        return {
+            'textual_rating': "Error",
+            'evidence': None,
+            'verification_score': 0.0
+        }
 
 def process_fact_check_manual(claim):
     """
     Manually process fact checking for a provided claim.
-    Returns a FactCheckResult instance.
+    Uses the Google Fact Check API to evaluate the claim and creates a FactCheckResult record.
+    
+    Returns:
+        FactCheckResult instance.
     """
-    disclosure_score = 0.8
-    clarity_score = 0.85
-    google_result = query_google_fact_check(claim)
-    news_result = query_news_api(claim)
-    accuracy_score = google_result.get("accuracy", 0.5)
-    source_score = news_result.get("source", 0.5)
-    composite_score = (disclosure_score + source_score + accuracy_score + clarity_score) / 4.0
-    details = {
-        "google_evidence": google_result.get("evidence"),
-        "news_evidence": news_result.get("evidence")
-    }
-    result = FactCheckResult.objects.create(
+    result = query_google_fact_check(claim)
+    fact_check_result = FactCheckResult.objects.create(
         claim=claim,
-        disclosure_score=disclosure_score,
-        source_score=source_score,
-        accuracy_score=accuracy_score,
-        clarity_score=clarity_score,
-        composite_score=composite_score,
-        details=details
+        textual_rating=result.get('textual_rating', "Unverified"),
+        evidence=result.get('evidence'),
+        verification_score=result.get('verification_score', 0.0)
     )
-    return result
+    return fact_check_result
+
+def process_fact_check_for_content(generated_content):
+    """
+    Automatically process fact checking for a GeneratedContent instance.
+    Uses the generated content's body as the claim.
+    """
+    claim = generated_content.body
+    process_fact_check_manual(claim)

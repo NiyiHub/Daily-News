@@ -3,12 +3,11 @@ from .models import FactCheckResult
 
 class FactCheckResultAdmin(admin.ModelAdmin):
     """
-    Custom admin configuration for FactCheckResult.
-    Displays claim, composite_score, and created_at.
+    Admin interface for FactCheckResult.
     """
-    list_display = ('claim', 'composite_score', 'created_at')
+    list_display = ('claim', 'textual_rating', 'verification_score', 'created_at')
     search_fields = ('claim',)
-    list_filter = ('created_at',)  # You can change this to any field you prefer.
+    list_filter = ('created_at',)
     ordering = ('-created_at',)
 
 admin.site.register(FactCheckResult, FactCheckResultAdmin)

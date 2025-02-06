@@ -7,11 +7,8 @@ class FactCheckResultSerializer(serializers.ModelSerializer):
         fields = [
             'id',
             'claim',
-            'disclosure_score',
-            'source_score',
-            'accuracy_score',
-            'clarity_score',
-            'composite_score',
-            'details',
+            'textual_rating',
+            'verification_score',
+            'evidence',
             'created_at'
         ]
