@@ -1,5 +1,3 @@
-# content_generation/models.py
-
 from django.db import models
 from django.db.models.signals import post_save
 from django.dispatch import receiver
@@ -61,3 +59,13 @@ def trigger_fact_check_for_generated_content(sender, instance, created, **kwargs
         except Exception as e:
             # Log the error or handle it appropriately; for now, we'll just print it.
             print("Error triggering fact check:", e)
+
+# NEW Signal: When a GeneratedContent record is created, trigger content processing.
+@receiver(post_save, sender=GeneratedContent)
+def trigger_processing(sender, instance, created, **kwargs):
+    if created:
+        try:
+            from content_processing.utils import process_generated_content
+            process_generated_content(instance)
+        except Exception as e:
+            print("Error triggering content processing:", e)

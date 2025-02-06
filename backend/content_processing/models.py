@@ -9,34 +9,31 @@ PUBLISH_CHOICES = [
 
 class ProcessedContent(models.Model):
     """
-    Model for processed content.
-    This includes categorization, tagging, fact-check metadata,
-    and an AI gatekeeping field for publish status.
+    Model for processed content that has been categorized, tagged, and fact-checked.
     """
     content = models.OneToOneField(GeneratedContent, on_delete=models.CASCADE, related_name="processed_content")
-    categories = models.JSONField(default=list, blank=True)  # Provides an empty list by default
-    tags = models.JSONField(default=list, blank=True)
-    fact_check_status = models.CharField(max_length=20, editable=False)  # Taken from FactCheckResult
-    composite_score = models.FloatField(editable=False, default=0.0)     # Fact-check composite score
+    categories = models.JSONField(default=list, blank=True)  # e.g., ["AI", "Technology"]
+    tags = models.JSONField(default=list, blank=True)        # Extracted tags/keywords
+    fact_check_status = models.CharField(max_length=20, editable=False, blank=True)
+    composite_score = models.FloatField(editable=False, default=0.0)
     publish_status = models.CharField(max_length=20, choices=PUBLISH_CHOICES, default='published')
     processed_at = models.DateTimeField(auto_now_add=True)
 
     def save(self, *args, **kwargs):
         """
-        Override save to automatically retrieve fact-checking data.
-        Also, determine the publish_status via AI gatekeeping logic:
-         - If composite_score is HIGH (>= threshold), mark as 'withheld'
-         - Otherwise, mark as 'published'
+        Override save() to retrieve fact-checking info and apply AI gatekeeping logic.
+        Uses the fact-check result to determine publish_status:
+          - If textual rating (TR) is "unverified", mark as 'published'
+          - If TR is "verified", mark as 'withheld'
         """
-        # Attempt to retrieve FactCheckResult based on content.body
         fact_check = FactCheckResult.objects.filter(claim=self.content.body).first()
         if fact_check:
-            self.fact_check_status = "Verified" if fact_check.composite_score >= 0.7 else "Unverified"
-            self.composite_score = fact_check.composite_score
-
-            # AI gatekeeping logic: Withhold if composite score is high (i.e. very factual)
-            # Let's assume threshold is 0.7: scores >= 0.7 (very factual) are withheld
-            if self.composite_score >= 0.7:
+            self.fact_check_status = fact_check.textual_rating
+            self.composite_score = fact_check.verification_score
+            # Using TR to determine publication:
+            if self.fact_check_status.lower() == "unverified":
+                self.publish_status = "published"
+            elif self.fact_check_status.lower() == "verified":
                 self.publish_status = "withheld"
             else:
                 self.publish_status = "published"
@@ -44,8 +41,41 @@ class ProcessedContent(models.Model):
             self.fact_check_status = "Unverified"
             self.composite_score = 0.0
             self.publish_status = "published"
-        
         super(ProcessedContent, self).save(*args, **kwargs)
 
     def __str__(self):
         return f"ProcessedContent for: {self.content.title} ({self.publish_status})"
+
+class PublishedContent(models.Model):
+    """
+    Model for content that is ready to be published on the frontend.
+    This includes text, fact-checking result, tags, multimedia fields, etc.
+    """
+    processed_content = models.OneToOneField(ProcessedContent, on_delete=models.CASCADE, related_name="published_content")
+    title = models.CharField(max_length=999)
+    body = models.TextField(max_length=2000)
+    fact_check_status = models.CharField(max_length=20)
+    tags = models.JSONField(default=list, blank=True)
+    image_url = models.URLField(null=True, blank=True)
+    video_url = models.URLField(null=True, blank=True)
+    published_at = models.DateTimeField(auto_now_add=True)
+    manually_overridden = models.BooleanField(default=False)
+
+    def __str__(self):
+        return f"PublishedContent: {self.title}"
+
+# NEW Signal: When ProcessedContent is created, automatically create a PublishedContent record if TR is "unverified".
+from django.db.models.signals import post_save
+from django.dispatch import receiver
+
+@receiver(post_save, sender=ProcessedContent)
+def trigger_publication(sender, instance, created, **kwargs):
+    if created and instance.fact_check_status.lower() == "unverified":
+        # Automatically publish if TR is "unverified"
+        PublishedContent.objects.create(
+            processed_content=instance,
+            title=instance.content.title,
+            body=instance.content.body,
+            fact_check_status=instance.fact_check_status,
+            tags=instance.tags
+        )

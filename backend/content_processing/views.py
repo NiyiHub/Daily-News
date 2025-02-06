@@ -7,31 +7,23 @@ from .utils import categorize_content, tag_content
 
 class ProcessContentView(APIView):
     """
-    API View for processing content that has been fact checked.
-    It retrieves a GeneratedContent instance, categorizes and tags it,
-    and then creates a ProcessedContent entry with AI gatekeeping applied.
+    API view to manually process a GeneratedContent instance.
+    It categorizes, tags, and creates a ProcessedContent record.
+    If the fact-check textual rating is "unverified", the content is automatically published.
     """
 
     def post(self, request, content_id):
         try:
-            # Retrieve generated content by ID
             content = GeneratedContent.objects.get(id=content_id)
-            
-            # Check if the content is already processed
             if hasattr(content, 'processed_content'):
                 return Response({"message": "Content has already been processed."}, status=status.HTTP_400_BAD_REQUEST)
-            
-            # Categorize and tag the content using helper functions
             categories = categorize_content(content.body)
             tags = tag_content(content.body)
-            
-            # Create ProcessedContent entry; fact-check info and publish_status are computed in save()
             processed = ProcessedContent.objects.create(
                 content=content,
                 categories=categories,
                 tags=tags
             )
-
             return Response({
                 "message": "Content processed successfully.",
                 "processed_content_id": processed.id,
