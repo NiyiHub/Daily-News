@@ -1,6 +1,6 @@
 from django.contrib import admin
 from .models import (
-    WrittenContent, 
+    WrittenContent,
     WrittenContentLike, 
     WrittenContentComment, 
     WrittenContentShare,

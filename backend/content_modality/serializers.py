@@ -23,14 +23,17 @@ class WrittenContentLikeSerializer(serializers.ModelSerializer):
         fields = ['id', 'created_at']
 
 class WrittenContentCommentSerializer(serializers.ModelSerializer):
+    # Include the foreign key field so that it can be saved from the view.
+    written_content = serializers.PrimaryKeyRelatedField(queryset=WrittenContent.objects.all())
+
     class Meta:
         model = WrittenContentComment
-        fields = ['id', 'text', 'created_at']
+        fields = ['id', 'written_content', 'text', 'created_at']
 
 class WrittenContentShareSerializer(serializers.ModelSerializer):
     class Meta:
         model = WrittenContentShare
-        fields = ['id', 'platform', 'created_at']
+        fields = ['id', 'written_content', 'platform', 'created_at']
 
 # --- Serializer for WrittenContent ---
 class WrittenContentSerializer(serializers.ModelSerializer):
@@ -50,14 +53,16 @@ class WrittenImageContentLikeSerializer(serializers.ModelSerializer):
         fields = ['id', 'created_at']
 
 class WrittenImageContentCommentSerializer(serializers.ModelSerializer):
+    written_image_content = serializers.PrimaryKeyRelatedField(queryset=WrittenImageContent.objects.all())
+
     class Meta:
         model = WrittenImageContentComment
-        fields = ['id', 'text', 'created_at']
+        fields = ['id', 'written_image_content', 'text', 'created_at']
 
 class WrittenImageContentShareSerializer(serializers.ModelSerializer):
     class Meta:
         model = WrittenImageContentShare
-        fields = ['id', 'platform', 'created_at']
+        fields = ['id', 'written_image_content', 'platform', 'created_at']
 
 # --- Serializer for WrittenImageContent ---
 class WrittenImageContentSerializer(serializers.ModelSerializer):
@@ -77,14 +82,16 @@ class VideoContentLikeSerializer(serializers.ModelSerializer):
         fields = ['id', 'created_at']
 
 class VideoContentCommentSerializer(serializers.ModelSerializer):
+    video_content = serializers.PrimaryKeyRelatedField(queryset=VideoContent.objects.all())
+
     class Meta:
         model = VideoContentComment
-        fields = ['id', 'text', 'created_at']
+        fields = ['id', 'video_content', 'text', 'created_at']
 
 class VideoContentShareSerializer(serializers.ModelSerializer):
     class Meta:
         model = VideoContentShare
-        fields = ['id', 'platform', 'created_at']
+        fields = ['id', 'video_content', 'platform', 'created_at']
 
 # --- Serializer for VideoContent ---
 class VideoContentSerializer(serializers.ModelSerializer):
