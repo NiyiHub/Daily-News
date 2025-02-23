@@ -4,86 +4,94 @@ from .models import (
     WrittenContentLike, 
     WrittenContentComment, 
     WrittenContentShare,
+
     WrittenImageContent, 
     WrittenImageContentLike, 
     WrittenImageContentComment, 
     WrittenImageContentShare,
+
     VideoContent, 
     VideoContentLike, 
     VideoContentComment, 
     VideoContentShare
 )
 
-# --- Serializers for WrittenContent ---
-class WrittenContentSerializer(serializers.ModelSerializer):
-    likes = serializers.SerializerMethodField()
-    comments = serializers.SerializerMethodField()
-    shares = serializers.SerializerMethodField()
-
+# --- Serializers for WrittenContent Interactive Features ---
+class WrittenContentLikeSerializer(serializers.ModelSerializer):
     class Meta:
-        model = WrittenContent
-        fields = ['id', 'published_content', 'title', 'content', 'created_at', 'likes', 'comments', 'shares']
-
-    def get_likes(self, obj):
-        return obj.likes.count()
-
-    def get_comments(self, obj):
-        return WrittenContentCommentSerializer(obj.comments.all(), many=True).data
-
-    def get_shares(self, obj):
-        return obj.shares.count()
+        model = WrittenContentLike
+        fields = ['id', 'created_at']
 
 class WrittenContentCommentSerializer(serializers.ModelSerializer):
     class Meta:
         model = WrittenContentComment
         fields = ['id', 'text', 'created_at']
 
+class WrittenContentShareSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = WrittenContentShare
+        fields = ['id', 'platform', 'created_at']
 
-# --- Serializers for WrittenImageContent ---
-class WrittenImageContentSerializer(serializers.ModelSerializer):
-    likes = serializers.SerializerMethodField()
-    comments = serializers.SerializerMethodField()
-    shares = serializers.SerializerMethodField()
+# --- Serializer for WrittenContent ---
+class WrittenContentSerializer(serializers.ModelSerializer):
+    likes = WrittenContentLikeSerializer(many=True, read_only=True)
+    comments = WrittenContentCommentSerializer(many=True, read_only=True)
+    shares = WrittenContentShareSerializer(many=True, read_only=True)
 
     class Meta:
-        model = WrittenImageContent
-        fields = ['id', 'published_content', 'title', 'content', 'image_url', 'created_at', 'likes', 'comments', 'shares']
+        model = WrittenContent
+        fields = ['id', 'published_content', 'title', 'content', 'created_at', 'likes', 'comments', 'shares']
 
-    def get_likes(self, obj):
-        return obj.likes.count()
 
-    def get_comments(self, obj):
-        return WrittenImageContentCommentSerializer(obj.comments.all(), many=True).data
-
-    def get_shares(self, obj):
-        return obj.shares.count()
+# --- Serializers for WrittenImageContent Interactive Features ---
+class WrittenImageContentLikeSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = WrittenImageContentLike
+        fields = ['id', 'created_at']
 
 class WrittenImageContentCommentSerializer(serializers.ModelSerializer):
     class Meta:
         model = WrittenImageContentComment
         fields = ['id', 'text', 'created_at']
 
+class WrittenImageContentShareSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = WrittenImageContentShare
+        fields = ['id', 'platform', 'created_at']
 
-# --- Serializers for VideoContent ---
-class VideoContentSerializer(serializers.ModelSerializer):
-    likes = serializers.SerializerMethodField()
-    comments = serializers.SerializerMethodField()
-    shares = serializers.SerializerMethodField()
+# --- Serializer for WrittenImageContent ---
+class WrittenImageContentSerializer(serializers.ModelSerializer):
+    likes = WrittenImageContentLikeSerializer(many=True, read_only=True)
+    comments = WrittenImageContentCommentSerializer(many=True, read_only=True)
+    shares = WrittenImageContentShareSerializer(many=True, read_only=True)
 
     class Meta:
-        model = VideoContent
-        fields = ['id', 'published_content', 'title', 'video_url', 'summary', 'created_at', 'likes', 'comments', 'shares']
+        model = WrittenImageContent
+        fields = ['id', 'published_content', 'title', 'content', 'image_url', 'created_at', 'likes', 'comments', 'shares']
 
-    def get_likes(self, obj):
-        return obj.likes.count()
 
-    def get_comments(self, obj):
-        return VideoContentCommentSerializer(obj.comments.all(), many=True).data
-
-    def get_shares(self, obj):
-        return obj.shares.count()
+# --- Serializers for VideoContent Interactive Features ---
+class VideoContentLikeSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = VideoContentLike
+        fields = ['id', 'created_at']
 
 class VideoContentCommentSerializer(serializers.ModelSerializer):
     class Meta:
         model = VideoContentComment
         fields = ['id', 'text', 'created_at']
+
+class VideoContentShareSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = VideoContentShare
+        fields = ['id', 'platform', 'created_at']
+
+# --- Serializer for VideoContent ---
+class VideoContentSerializer(serializers.ModelSerializer):
+    likes = VideoContentLikeSerializer(many=True, read_only=True)
+    comments = VideoContentCommentSerializer(many=True, read_only=True)
+    shares = VideoContentShareSerializer(many=True, read_only=True)
+
+    class Meta:
+        model = VideoContent
+        fields = ['id', 'published_content', 'title', 'video_url', 'summary', 'created_at', 'likes', 'comments', 'shares']
