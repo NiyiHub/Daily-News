@@ -1,8 +1,17 @@
 from django.contrib import admin
 from .models import (
-    WrittenContent, WrittenContentLike, WrittenContentComment, WrittenContentShare,
-    WrittenImageContent, WrittenImageContentLike, WrittenImageContentComment, WrittenImageContentShare,
-    VideoContent, VideoContentLike, VideoContentComment, VideoContentShare
+    WrittenContent, 
+    WrittenContentLike, 
+    WrittenContentComment, 
+    WrittenContentShare,
+    WrittenImageContent, 
+    WrittenImageContentLike, 
+    WrittenImageContentComment, 
+    WrittenImageContentShare,
+    VideoContent, 
+    VideoContentLike, 
+    VideoContentComment, 
+    VideoContentShare
 )
 
 @admin.register(WrittenContent)

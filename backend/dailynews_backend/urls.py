@@ -21,4 +21,5 @@ urlpatterns = [
     path('admin/', admin.site.urls),
     path('content/', include('content_generation.urls')),
     path('fact_check/', include('fact_checking.urls')),
+    path('news/', include('content_modality.urls')),
 ]

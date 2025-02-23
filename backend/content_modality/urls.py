@@ -1,8 +1,23 @@
 from django.urls import path
-from .views import CreateWrittenContentView, CreateWrittenImageContentView, CreateVideoContentView
+from .views import (
+    WrittenContentPostView, 
+    WrittenContentGetView,
+    WrittenImageContentPostView, 
+    WrittenImageContentGetView,
+    VideoContentPostView, 
+    VideoContentGetView
+)
 
 urlpatterns = [
-    path('written/', CreateWrittenContentView.as_view(), name='create_written_content'),
-    path('written-image/', CreateWrittenImageContentView.as_view(), name='create_written_image_content'),
-    path('video/', CreateVideoContentView.as_view(), name='create_video_content'),
+    # Endpoints for Written Content
+    path('written/', WrittenContentPostView.as_view(), name='post_written_content'),
+    path('written/get/', WrittenContentGetView.as_view(), name='get_written_content'),
+    
+    # Endpoints for Written+Image Content
+    path('written-image/', WrittenImageContentPostView.as_view(), name='post_written_image_content'),
+    path('written-image/get/', WrittenImageContentGetView.as_view(), name='get_written_image_content'),
+    
+    # Endpoints for Video Content
+    path('video/', VideoContentPostView.as_view(), name='post_video_content'),
+    path('video/get/', VideoContentGetView.as_view(), name='get_video_content'),
 ]
