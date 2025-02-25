@@ -84,7 +84,7 @@ class VideoContent(models.Model):
     )
     title = models.CharField(max_length=999)  # Title for the video content
     video_url = models.URLField(null=True, blank=True)  # Video URL
-    summary = models.TextField(max_length=200, help_text="Summary (50-70 words)")  # Video summary
+    summary = models.TextField(max_length=200, help_text="Summary (20-40 words)")  # Video summary
     created_at = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
