@@ -106,7 +106,7 @@ WSGI_APPLICATION = 'dailynews_backend.wsgi.application'
 
 DATABASES = {
       'default': dj_database_url.config(
-          default=os.environ.get('postgresql://daily_news_admin:GbeEr9FZSPfhlVByvbW2ucZ0qb4qqOFV@dpg-cv09aetsvqrc73ajm68g-a/daily_news_postgresql')
+          default=os.environ.get('DATABASE_URL')
       )
   }
 
