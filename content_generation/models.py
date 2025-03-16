@@ -1,6 +1,7 @@
 from django.db import models
 from django.db.models.signals import post_save
 from django.dispatch import receiver
+from django.db import transaction
 
 class APIPrompt(models.Model):
     """
@@ -31,6 +32,7 @@ class GeneratedContent(models.Model):
 @receiver(post_save, sender=APIPrompt)
 def trigger_content_generation(sender, instance, created, **kwargs):
     if created and instance.status == 'pending':
+        transaction.on_commit(lambda: generate_content_from_prompt(instance.prompt_text))
         from .utils import generate_content_from_prompt
         try:
             result = generate_content_from_prompt(
