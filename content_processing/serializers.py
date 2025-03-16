@@ -11,6 +11,7 @@ class ProcessedContentSerializer(serializers.ModelSerializer):
             'tags',
             'fact_check_status',
             'composite_score',
+            'evidence',
             'publish_status',
             'processed_at'
         ]
@@ -24,6 +25,7 @@ class PublishedContentSerializer(serializers.ModelSerializer):
             'title',
             'body',
             'fact_check_status',
+            'evidence',
             'tags',
             'image_url',
             'video_url',
