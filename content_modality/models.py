@@ -14,7 +14,7 @@ class WrittenContent(models.Model):
         related_name="written_content"
     )
     title = models.CharField(max_length=999)  # Title of the article
-    content = models.TextField(max_length=2000)  # Article text content
+    content = models.TextField(max_length=5000)  # Article text content
     created_at = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
@@ -48,7 +48,7 @@ class WrittenImageContent(models.Model):
         related_name="written_image_content"
     )
     title = models.CharField(max_length=999)  # Title of the article
-    content = models.TextField(max_length=2000)  # Article text content
+    content = models.TextField(max_length=5000)  # Article text content
     image_url = models.URLField(null=True, blank=True)  # Associated image URL
     created_at = models.DateTimeField(auto_now_add=True)
 

@@ -16,7 +16,7 @@ class ProcessedContent(models.Model):
     tags = models.JSONField(default=list, blank=True)  # Extracted tags/keywords
     fact_check_status = models.CharField(max_length=20, editable=False, blank=True)
     composite_score = models.FloatField(editable=False, default=0.0)
-    evidence = models.JSONField(default=dict, blank=True)  # Store evidence from fact-checking
+    evidence = models.JSONField(default=dict, blank=True, null=True)  # Store evidence from fact-checking
     publish_status = models.CharField(max_length=20, choices=PUBLISH_CHOICES, default='published')
     processed_at = models.DateTimeField(auto_now_add=True)
 
@@ -56,13 +56,13 @@ class PublishedContent(models.Model):
     """
     processed_content = models.OneToOneField(ProcessedContent, on_delete=models.CASCADE, related_name="published_content")
     title = models.CharField(max_length=999)
-    body = models.TextField(max_length=2000)
+    body = models.TextField(max_length=5000)
     fact_check_status = models.CharField(max_length=20)
-    evidence = models.JSONField(default=dict, blank=True)  # Editable evidence field
+    evidence = models.JSONField(default=dict, blank=True, null=True)
     tags = models.JSONField(default=list, blank=True)
     image_url = models.URLField(null=True, blank=True)
     video_url = models.URLField(null=True, blank=True)
-    published_at = models.DateTimeField(auto_now_add=True)
+    published_at = models.DateTimeField(auto_now_add=True, editable=False)
     manually_overridden = models.BooleanField(default=False)
 
     def save(self, *args, **kwargs):

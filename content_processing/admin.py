@@ -1,5 +1,3 @@
-# content_processing/admin.py
-
 from django.contrib import admin
 from .models import ProcessedContent, PublishedContent
 
@@ -16,3 +14,4 @@ class PublishedContentAdmin(admin.ModelAdmin):
     list_filter = ('manually_overridden', 'fact_check_status')
     fields = ('processed_content', 'title', 'body', 'fact_check_status', 'evidence', 'tags', 'image_url', 'video_url', 'published_at', 'manually_overridden')
     search_fields = ('title', 'fact_check_status')
+    readonly_fields = ('published_at',)
