@@ -1,4 +1,4 @@
-from django.urls import path
+from django.urls import path 
 from .views import (
     UserLoginView,
     UserSessionView,
@@ -19,7 +19,10 @@ from .views import (
     VideoContentGetView, 
     VideoContentCommentView, 
     VideoContentLikeView, 
-    VideoContentShareView
+    VideoContentShareView,
+
+    UserBookmarkView,
+    UserBookmarkView
 )
 
 urlpatterns = [
@@ -32,6 +35,9 @@ urlpatterns = [
     path('written/<int:written_content_id>/comment/', WrittenContentCommentView.as_view(), name='written_content_comment'),
     path('written/<int:written_content_id>/like/', WrittenContentLikeView.as_view(), name='written_content_like'),
     path('written/<int:written_content_id>/share/', WrittenContentShareView.as_view(), name='written_content_share'),
+    
+    # WrittenContent Bookmarking
+    path('written/<int:written_content_id>/bookmark/', UserBookmarkView.as_view(), name='written_content_bookmark'),
 
     # WrittenImageContent endpoints
     path('written-image/', WrittenImageContentPostView.as_view(), name='post_written_image_content'),
@@ -40,10 +46,19 @@ urlpatterns = [
     path('written-image/<int:written_image_content_id>/like/', WrittenImageContentLikeView.as_view(), name='written_image_content_like'),
     path('written-image/<int:written_image_content_id>/share/', WrittenImageContentShareView.as_view(), name='written_image_content_share'),
 
+    # WrittenImageContent Bookmarking
+    path('written-image/<int:written_image_content_id>/bookmark/', UserBookmarkView.as_view(), name='written_image_content_bookmark'),
+
     # VideoContent endpoints
     path('video/', VideoContentPostView.as_view(), name='post_video_content'),
     path('video/get/', VideoContentGetView.as_view(), name='get_video_content'),
     path('video/<int:video_content_id>/comment/', VideoContentCommentView.as_view(), name='video_content_comment'),
     path('video/<int:video_content_id>/like/', VideoContentLikeView.as_view(), name='video_content_like'),
     path('video/<int:video_content_id>/share/', VideoContentShareView.as_view(), name='video_content_share'),
+
+    # VideoContent Bookmarking
+    path('video/<int:video_content_id>/bookmark/', UserBookmarkView.as_view(), name='video_content_bookmark'),
+
+    # Retrieve all user bookmarks
+    path('bookmarks/<str:user_id>/', UserBookmarkView.as_view(), name='get_user_bookmarks'),
 ]
