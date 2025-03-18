@@ -1,5 +1,8 @@
 from django.urls import path
 from .views import (
+    UserLoginView,
+    UserSessionView,
+
     WrittenContentPostView, 
     WrittenContentGetView, 
     WrittenContentCommentView, 
@@ -20,6 +23,9 @@ from .views import (
 )
 
 urlpatterns = [
+    path('api/user/login/', UserLoginView.as_view(), name='user-login'),
+    path('api/user/session/', UserSessionView.as_view(), name='user-session'),
+    
     # WrittenContent endpoints
     path('written/', WrittenContentPostView.as_view(), name='post_written_content'),
     path('written/get/', WrittenContentGetView.as_view(), name='get_written_content'),

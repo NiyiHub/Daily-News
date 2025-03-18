@@ -1,5 +1,7 @@
 from rest_framework import serializers
 from .models import (
+    UserSession,
+
     WrittenContent, 
     WrittenContentLike, 
     WrittenContentComment, 
@@ -15,6 +17,11 @@ from .models import (
     VideoContentComment, 
     VideoContentShare
 )
+
+class UserSessionSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = UserSession
+        fields = ['user_id', 'session_token', 'created_at', 'last_active']
 
 # --- Serializers for WrittenContent Interactive Features ---
 class WrittenContentLikeSerializer(serializers.ModelSerializer):
