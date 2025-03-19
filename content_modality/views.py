@@ -76,7 +76,7 @@ class UserSessionView(views.APIView):
 
 # ---- Bookmark View ----
 class UserBookmarkView(APIView):
-    def post(self, request, written_content_id):
+    def post(self, request):
         user_id = request.data.get("user_id")
         content_id = request.data.get("content_id")
         content_type = request.data.get("content_type")
@@ -86,7 +86,7 @@ class UserBookmarkView(APIView):
 
         try:
             user = UserSession.objects.get(user_id=user_id)
-            UserBookmark.objects.create(user=user, content_id=written_content_id, content_type=content_type)
+            UserBookmark.objects.create(user=user, content_id=content_id, content_type=content_type)
             return Response({"message": "Bookmark added successfully."}, status=status.HTTP_201_CREATED)
         except UserSession.DoesNotExist:
             return Response({"error": "User session not found."}, status=status.HTTP_400_BAD_REQUEST)

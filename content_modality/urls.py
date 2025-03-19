@@ -37,7 +37,7 @@ urlpatterns = [
     path('written/<int:written_content_id>/share/', WrittenContentShareView.as_view(), name='written_content_share'),
     
     # WrittenContent Bookmarking
-    path('written/<int:written_content_id>/bookmark/', UserBookmarkView.as_view(), name='written_content_bookmark'),
+    path('written/<int:written_content_id>/bookmark/', UserBookmarkView.as_view(), name='user_bookmark'),
 
     # WrittenImageContent endpoints
     path('written-image/', WrittenImageContentPostView.as_view(), name='post_written_image_content'),
@@ -47,7 +47,7 @@ urlpatterns = [
     path('written-image/<int:written_image_content_id>/share/', WrittenImageContentShareView.as_view(), name='written_image_content_share'),
 
     # WrittenImageContent Bookmarking
-    path('written-image/<int:written_image_content_id>/bookmark/', UserBookmarkView.as_view(), name='written_image_content_bookmark'),
+    path('written-image/<int:written_image_content_id>/bookmark/', UserBookmarkView.as_view(), name='user_bookmark'),
 
     # VideoContent endpoints
     path('video/', VideoContentPostView.as_view(), name='post_video_content'),
@@ -57,7 +57,7 @@ urlpatterns = [
     path('video/<int:video_content_id>/share/', VideoContentShareView.as_view(), name='video_content_share'),
 
     # VideoContent Bookmarking
-    path('video/<int:video_content_id>/bookmark/', UserBookmarkView.as_view(), name='video_content_bookmark'),
+    path('video/<int:video_content_id>/bookmark/', UserBookmarkView.as_view(), name='user_bookmark'),
 
     # Retrieve all user bookmarks
     path('bookmarks/<str:user_id>/', UserBookmarkView.as_view(), name='get_user_bookmarks'),

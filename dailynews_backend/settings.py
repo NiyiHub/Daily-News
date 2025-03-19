@@ -16,6 +16,10 @@ from decouple import config
 import dj_database_url
 import os
 
+import environ
+
+env = environ.Env()
+environ.Env.read_env()
 
 # Retrieve the OpenAI API key
 OPENAI_API_KEY = os.environ.get('OPENAI_API_KEY')
@@ -99,10 +103,14 @@ WSGI_APPLICATION = 'dailynews_backend.wsgi.application'
 # Database
 # https://docs.djangoproject.com/en/5.1/ref/settings/#databases
 
+# DATABASES = {
+#       'default': dj_database_url.config(default=config('DATABASE_URL')
+#       )
+#   }
+
 DATABASES = {
-      'default': dj_database_url.config(default=config('DATABASE_URL')
-      )
-  }
+    'default': env.db()
+}
 
 STATIC_URL = '/static/'
 STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
