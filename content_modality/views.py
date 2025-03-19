@@ -75,8 +75,8 @@ class UserSessionView(views.APIView):
         
 
 # ---- Bookmark View ----
-class UserBookmarkView(APIView):
-    def post(self, request):
+class UserBookmarkViewWritten(APIView):
+    def post(self, request, written_content_id):
         user_id = request.data.get("user_id")
         content_id = request.data.get("content_id")
         content_type = request.data.get("content_type")
@@ -86,7 +86,71 @@ class UserBookmarkView(APIView):
 
         try:
             user = UserSession.objects.get(user_id=user_id)
-            UserBookmark.objects.create(user=user, content_id=content_id, content_type=content_type)
+            UserBookmark.objects.create(user=user, content_id=written_content_id, content_type=content_type)
+            return Response({"message": "Bookmark added successfully."}, status=status.HTTP_201_CREATED)
+        except UserSession.DoesNotExist:
+            return Response({"error": "User session not found."}, status=status.HTTP_400_BAD_REQUEST)
+        
+
+    def get(self, request):
+        user_id = request.query_params.get("user_id")
+
+        if not user_id:
+            return Response({"error": "User ID is required."}, status=status.HTTP_400_BAD_REQUEST)
+
+        try:
+            user = UserSession.objects.get(user_id=user_id)
+            bookmarks = UserBookmark.objects.filter(user=user)
+            bookmark_data = [{"content_id": b.content_id, "content_type": b.content_type, "created_at": b.created_at} for b in bookmarks]
+            return Response({"bookmarks": bookmark_data}, status=status.HTTP_200_OK)
+        except UserSession.DoesNotExist:
+            return Response({"error": "User session not found."}, status=status.HTTP_400_BAD_REQUEST)
+        
+
+class UserBookmarkViewWrittenImage(APIView):
+    def post(self, request, written_image_content_id):
+        user_id = request.data.get("user_id")
+        content_id = request.data.get("content_id")
+        content_type = request.data.get("content_type")
+
+        if not user_id or not content_id or not content_type:
+            return Response({"error": "User ID, content ID, and content type are required."}, status=status.HTTP_400_BAD_REQUEST)
+
+        try:
+            user = UserSession.objects.get(user_id=user_id)
+            UserBookmark.objects.create(user=user, content_id=written_image_content_id, content_type=content_type)
+            return Response({"message": "Bookmark added successfully."}, status=status.HTTP_201_CREATED)
+        except UserSession.DoesNotExist:
+            return Response({"error": "User session not found."}, status=status.HTTP_400_BAD_REQUEST)
+        
+
+    def get(self, request):
+        user_id = request.query_params.get("user_id")
+
+        if not user_id:
+            return Response({"error": "User ID is required."}, status=status.HTTP_400_BAD_REQUEST)
+
+        try:
+            user = UserSession.objects.get(user_id=user_id)
+            bookmarks = UserBookmark.objects.filter(user=user)
+            bookmark_data = [{"content_id": b.content_id, "content_type": b.content_type, "created_at": b.created_at} for b in bookmarks]
+            return Response({"bookmarks": bookmark_data}, status=status.HTTP_200_OK)
+        except UserSession.DoesNotExist:
+            return Response({"error": "User session not found."}, status=status.HTTP_400_BAD_REQUEST)
+        
+
+class UserBookmarkViewVideo(APIView):
+    def post(self, request, video_content_id):
+        user_id = request.data.get("user_id")
+        content_id = request.data.get("content_id")
+        content_type = request.data.get("content_type")
+
+        if not user_id or not content_id or not content_type:
+            return Response({"error": "User ID, content ID, and content type are required."}, status=status.HTTP_400_BAD_REQUEST)
+
+        try:
+            user = UserSession.objects.get(user_id=user_id)
+            UserBookmark.objects.create(user=user, content_id=video_content_id, content_type=content_type)
             return Response({"message": "Bookmark added successfully."}, status=status.HTTP_201_CREATED)
         except UserSession.DoesNotExist:
             return Response({"error": "User session not found."}, status=status.HTTP_400_BAD_REQUEST)
