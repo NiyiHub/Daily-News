@@ -76,7 +76,28 @@ MIDDLEWARE = [
 CORS_ALLOWED_ORIGINS = [
     "http://localhost:8000",
     "http://127.0.0.1:8000",
-    # add your frontend domain if different
+    "https://ai-news-lilac-psi.vercel.app",
+    "https://daily-news-5k66.onrender.com",
+]
+
+CORS_ALLOW_METHODS = [
+    "GET",
+    "POST",
+    "PUT",
+    "DELETE",
+    "OPTIONS",
+]
+
+CORS_ALLOW_HEADERS = [
+    "content-type",
+    "authorization",
+    "x-requested-with",
+]
+
+CSRF_TRUSTED_ORIGINS = [
+    "http://localhost:3000",
+    "https://ai-news-lilac-psi.vercel.app",
+    "https://daily-news-5k66.onrender.com",
 ]
 
 ROOT_URLCONF = 'dailynews_backend.urls'
