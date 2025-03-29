@@ -31,7 +31,7 @@ class ProcessContentView(APIView):
                 PublishedContent.objects.create(
                     processed_content=processed,
                     title=content.title,
-                    body=content.body,
+                    body=content.body, 
                     fact_check_status=processed.fact_check_status,
                     tags=processed.tags
                 )
@@ -74,5 +74,21 @@ class PublishedContentEvidenceView(APIView):
             return Response({"message": "Evidence updated successfully.", "evidence": published.evidence}, status=status.HTTP_200_OK)
         except PublishedContent.DoesNotExist:
             return Response({"error": "Published content not found."}, status=status.HTTP_404_NOT_FOUND)
+        except Exception as e:
+            return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+class CategoryListView(APIView):
+    """
+    API view to retrieve a list of unique categories from processed content.
+    """
+    def get(self, request):
+        try:
+            categories = ProcessedContent.objects.values_list('categories', flat=True).distinct()
+            unique_categories = set()
+            for category_list in categories:
+                if category_list:
+                    unique_categories.update(category_list)  # Flatten and remove duplicates
+            
+            return Response({"categories": list(unique_categories)}, status=status.HTTP_200_OK)
         except Exception as e:
             return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
