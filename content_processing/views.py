@@ -77,18 +77,17 @@ class PublishedContentEvidenceView(APIView):
         except Exception as e:
             return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
-class CategoryListView(APIView):
+class CategoryDetailView(APIView):
     """
-    API view to retrieve a list of unique categories from processed content.
+    API view to retrieve categories for a specific ProcessedContent instance.
     """
-    def get(self, request):
+    def get(self, request, processed_content_id):
         try:
-            categories = ProcessedContent.objects.values_list('categories', flat=True).distinct()
-            unique_categories = set()
-            for category_list in categories:
-                if category_list:
-                    unique_categories.update(category_list)  # Flatten and remove duplicates
-            
-            return Response({"categories": list(unique_categories)}, status=status.HTTP_200_OK)
+            processed_content = ProcessedContent.objects.get(id=processed_content_id)
+            categories = processed_content.categories  # Assuming this is stored as a list or a string
+
+            return Response({"categories": categories}, status=status.HTTP_200_OK)
+        except ProcessedContent.DoesNotExist:
+            return Response({"error": "Processed content not found."}, status=status.HTTP_404_NOT_FOUND)
         except Exception as e:
             return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
