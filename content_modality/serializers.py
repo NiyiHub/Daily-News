@@ -1,7 +1,7 @@
 from rest_framework import serializers
 from .models import (
     UserSession,
-
+    
     WrittenContent, 
     WrittenContentLike, 
     WrittenContentComment, 
@@ -30,9 +30,7 @@ class WrittenContentLikeSerializer(serializers.ModelSerializer):
         fields = ['id', 'created_at']
 
 class WrittenContentCommentSerializer(serializers.ModelSerializer):
-    # Include the foreign key field so that it can be saved from the view.
     written_content = serializers.PrimaryKeyRelatedField(queryset=WrittenContent.objects.all())
-
     class Meta:
         model = WrittenContentComment
         fields = ['id', 'written_content', 'text', 'created_at']
@@ -47,11 +45,9 @@ class WrittenContentSerializer(serializers.ModelSerializer):
     likes = WrittenContentLikeSerializer(many=True, read_only=True)
     comments = WrittenContentCommentSerializer(many=True, read_only=True)
     shares = WrittenContentShareSerializer(many=True, read_only=True)
-
     class Meta:
         model = WrittenContent
-        fields = ['id', 'published_content', 'title', 'content', 'created_at', 'likes', 'comments', 'shares']
-
+        fields = ['id', 'published_content', 'title', 'content', 'created_at', 'category', 'likes', 'comments', 'shares']
 
 # --- Serializers for WrittenImageContent Interactive Features ---
 class WrittenImageContentLikeSerializer(serializers.ModelSerializer):
@@ -61,7 +57,6 @@ class WrittenImageContentLikeSerializer(serializers.ModelSerializer):
 
 class WrittenImageContentCommentSerializer(serializers.ModelSerializer):
     written_image_content = serializers.PrimaryKeyRelatedField(queryset=WrittenImageContent.objects.all())
-
     class Meta:
         model = WrittenImageContentComment
         fields = ['id', 'written_image_content', 'text', 'created_at']
@@ -76,11 +71,9 @@ class WrittenImageContentSerializer(serializers.ModelSerializer):
     likes = WrittenImageContentLikeSerializer(many=True, read_only=True)
     comments = WrittenImageContentCommentSerializer(many=True, read_only=True)
     shares = WrittenImageContentShareSerializer(many=True, read_only=True)
-
     class Meta:
         model = WrittenImageContent
-        fields = ['id', 'published_content', 'title', 'content', 'image_url', 'created_at', 'likes', 'comments', 'shares']
-
+        fields = ['id', 'published_content', 'title', 'content', 'image_url', 'created_at', 'category', 'likes', 'comments', 'shares']
 
 # --- Serializers for VideoContent Interactive Features ---
 class VideoContentLikeSerializer(serializers.ModelSerializer):
@@ -90,7 +83,6 @@ class VideoContentLikeSerializer(serializers.ModelSerializer):
 
 class VideoContentCommentSerializer(serializers.ModelSerializer):
     video_content = serializers.PrimaryKeyRelatedField(queryset=VideoContent.objects.all())
-
     class Meta:
         model = VideoContentComment
         fields = ['id', 'video_content', 'text', 'created_at']
@@ -105,7 +97,6 @@ class VideoContentSerializer(serializers.ModelSerializer):
     likes = VideoContentLikeSerializer(many=True, read_only=True)
     comments = VideoContentCommentSerializer(many=True, read_only=True)
     shares = VideoContentShareSerializer(many=True, read_only=True)
-
     class Meta:
         model = VideoContent
-        fields = ['id', 'published_content', 'title', 'video_url', 'summary', 'created_at', 'likes', 'comments', 'shares']
+        fields = ['id', 'published_content', 'title', 'video_url', 'summary', 'created_at', 'category', 'likes', 'comments', 'shares']

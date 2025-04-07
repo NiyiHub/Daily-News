@@ -30,12 +30,12 @@ class UserBookmarkAdmin(admin.ModelAdmin):
     list_display = ('user', 'content_id', 'content_type', 'created_at')
     search_fields = ('user__user_id', 'content_id')
 
-
 # ---- Written Content Admin ----
 @admin.register(WrittenContent)
 class WrittenContentAdmin(admin.ModelAdmin):
-    list_display = ('title', 'published_content', 'created_at')
+    list_display = ('title', 'published_content', 'category', 'created_at')
     search_fields = ('title', 'content')
+    list_filter = ('category',)
 
 @admin.register(WrittenContentLike)
 class WrittenContentLikeAdmin(admin.ModelAdmin):
@@ -52,12 +52,12 @@ class WrittenContentShareAdmin(admin.ModelAdmin):
     list_display = ('user', 'written_content', 'platform', 'created_at')
     search_fields = ('user__user_id', 'platform')
 
-
-# ---- Written+Image Content Admin ----
+# ---- WrittenImageContent Admin ----
 @admin.register(WrittenImageContent)
 class WrittenImageContentAdmin(admin.ModelAdmin):
-    list_display = ('title', 'published_content', 'created_at')
+    list_display = ('title', 'published_content', 'category', 'created_at')
     search_fields = ('title', 'content')
+    list_filter = ('category',)
 
 @admin.register(WrittenImageContentLike)
 class WrittenImageContentLikeAdmin(admin.ModelAdmin):
@@ -74,12 +74,12 @@ class WrittenImageContentShareAdmin(admin.ModelAdmin):
     list_display = ('user', 'written_image_content', 'platform', 'created_at')
     search_fields = ('user__user_id', 'platform')
 
-
 # ---- Video Content Admin ----
 @admin.register(VideoContent)
 class VideoContentAdmin(admin.ModelAdmin):
-    list_display = ('title', 'published_content', 'created_at')
+    list_display = ('title', 'published_content', 'category', 'created_at')
     search_fields = ('title',)
+    list_filter = ('category',)
 
 @admin.register(VideoContentLike)
 class VideoContentLikeAdmin(admin.ModelAdmin):

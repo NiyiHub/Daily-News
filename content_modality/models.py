@@ -3,6 +3,20 @@ from content_processing.models import PublishedContent
 import uuid
 from django.utils.timezone import now
 
+# Predefined category choices
+CATEGORY_CHOICES = [
+    ('US', 'U.S'),
+    ('WORLD', 'World'),
+    ('POLITICS', 'Politics'),
+    ('HEALTH', 'Health'),
+    ('SCI_TECH', 'Science & Tech'),
+    ('BUSINESS', 'Business'),
+    ('LIFESTYLE', 'Lifestyle'),
+    ('OPINION', 'Opinion'),
+    ('MEDIA', 'Media'),
+    ('SPORTS', 'Sports'),
+    ('WEATHER', 'Weather'),
+]
 
 class UserSession(models.Model):
     """
@@ -32,14 +46,13 @@ class UserSession(models.Model):
 # ---------------------------
 # Bookmark Model
 # ---------------------------
-
 class UserBookmark(models.Model):
     """
     Model to track content bookmarked by users.
     """
     user = models.ForeignKey(UserSession, on_delete=models.CASCADE, related_name="bookmarks")
     content_id = models.CharField(max_length=255)
-    content_type = models.CharField(max_length=50)  # e.g., Written, Video, Image
+    content_type = models.CharField(max_length=50)  # e.g., Written, Video, WrittenImage
     created_at = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
@@ -48,7 +61,6 @@ class UserBookmark(models.Model):
 # ---------------------------
 # Interactive Models for Written Content
 # ---------------------------
-
 class WrittenContent(models.Model):
     published_content = models.OneToOneField(
         PublishedContent, 
@@ -58,6 +70,7 @@ class WrittenContent(models.Model):
     title = models.CharField(max_length=999)  
     content = models.TextField(max_length=5000)  
     created_at = models.DateTimeField(auto_now_add=True)
+    category = models.CharField(max_length=20, choices=CATEGORY_CHOICES, default='US')
 
     def __str__(self):
         return f"WrittenContent: {self.title}"
@@ -82,7 +95,6 @@ class WrittenContentShare(models.Model):
 # ---------------------------
 # Interactive Models for Written+Image Content
 # ---------------------------
-
 class WrittenImageContent(models.Model):
     published_content = models.OneToOneField(
         PublishedContent, 
@@ -93,6 +105,7 @@ class WrittenImageContent(models.Model):
     content = models.TextField(max_length=5000)  
     image_url = models.URLField(null=True, blank=True)  
     created_at = models.DateTimeField(auto_now_add=True)
+    category = models.CharField(max_length=20, choices=CATEGORY_CHOICES, default='US')
 
     def __str__(self):
         return f"WrittenImageContent: {self.title}"
@@ -117,7 +130,6 @@ class WrittenImageContentShare(models.Model):
 # ---------------------------
 # Interactive Models for Video Content
 # ---------------------------
-
 class VideoContent(models.Model):
     published_content = models.OneToOneField(
         PublishedContent, 
@@ -128,6 +140,7 @@ class VideoContent(models.Model):
     video_url = models.URLField(null=True, blank=True)  
     summary = models.TextField(max_length=200)  
     created_at = models.DateTimeField(auto_now_add=True)
+    category = models.CharField(max_length=20, choices=CATEGORY_CHOICES, default='US')
 
     def __str__(self):
         return f"VideoContent: {self.title}"

@@ -53,8 +53,6 @@ class UserLoginView(views.APIView):
             "created_at": session.created_at,
             "last_active": session.last_active
         }, status=status.HTTP_200_OK)
-    
-
 
 class UserSessionView(views.APIView):
     """Handles session validation."""
@@ -72,32 +70,25 @@ class UserSessionView(views.APIView):
             }, status=status.HTTP_200_OK)
         except UserSession.DoesNotExist:
             return Response({"error": "Invalid session token."}, status=status.HTTP_401_UNAUTHORIZED)
-        
 
-# ---- Bookmark View ----
+# ---- Bookmark Views for Written Content ----
 class UserBookmarkViewWritten(APIView):
     def post(self, request, written_content_id):
         user_id = request.data.get("user_id")
-        content_id = request.data.get("content_id")
         content_type = request.data.get("content_type")
-
-        if not user_id or not content_id or not content_type:
-            return Response({"error": "User ID, content ID, and content type are required."}, status=status.HTTP_400_BAD_REQUEST)
-
+        if not user_id or not content_type:
+            return Response({"error": "User ID and content type are required."}, status=status.HTTP_400_BAD_REQUEST)
         try:
             user = UserSession.objects.get(user_id=user_id)
             UserBookmark.objects.create(user=user, content_id=written_content_id, content_type=content_type)
             return Response({"message": "Bookmark added successfully."}, status=status.HTTP_201_CREATED)
         except UserSession.DoesNotExist:
             return Response({"error": "User session not found."}, status=status.HTTP_400_BAD_REQUEST)
-        
-
+    
     def get(self, request):
         user_id = request.query_params.get("user_id")
-
         if not user_id:
             return Response({"error": "User ID is required."}, status=status.HTTP_400_BAD_REQUEST)
-
         try:
             user = UserSession.objects.get(user_id=user_id)
             bookmarks = UserBookmark.objects.filter(user=user)
@@ -105,31 +96,25 @@ class UserBookmarkViewWritten(APIView):
             return Response({"bookmarks": bookmark_data}, status=status.HTTP_200_OK)
         except UserSession.DoesNotExist:
             return Response({"error": "User session not found."}, status=status.HTTP_400_BAD_REQUEST)
-        
 
+# ---- Bookmark Views for WrittenImage Content ----
 class UserBookmarkViewWrittenImage(APIView):
     def post(self, request, written_image_content_id):
         user_id = request.data.get("user_id")
-        content_id = request.data.get("content_id")
         content_type = request.data.get("content_type")
-
-        if not user_id or not content_id or not content_type:
-            return Response({"error": "User ID, content ID, and content type are required."}, status=status.HTTP_400_BAD_REQUEST)
-
+        if not user_id or not content_type:
+            return Response({"error": "User ID and content type are required."}, status=status.HTTP_400_BAD_REQUEST)
         try:
             user = UserSession.objects.get(user_id=user_id)
             UserBookmark.objects.create(user=user, content_id=written_image_content_id, content_type=content_type)
             return Response({"message": "Bookmark added successfully."}, status=status.HTTP_201_CREATED)
         except UserSession.DoesNotExist:
             return Response({"error": "User session not found."}, status=status.HTTP_400_BAD_REQUEST)
-        
-
+    
     def get(self, request):
         user_id = request.query_params.get("user_id")
-
         if not user_id:
             return Response({"error": "User ID is required."}, status=status.HTTP_400_BAD_REQUEST)
-
         try:
             user = UserSession.objects.get(user_id=user_id)
             bookmarks = UserBookmark.objects.filter(user=user)
@@ -137,31 +122,25 @@ class UserBookmarkViewWrittenImage(APIView):
             return Response({"bookmarks": bookmark_data}, status=status.HTTP_200_OK)
         except UserSession.DoesNotExist:
             return Response({"error": "User session not found."}, status=status.HTTP_400_BAD_REQUEST)
-        
 
+# ---- Bookmark Views for Video Content ----
 class UserBookmarkViewVideo(APIView):
     def post(self, request, video_content_id):
         user_id = request.data.get("user_id")
-        content_id = request.data.get("content_id")
         content_type = request.data.get("content_type")
-
-        if not user_id or not content_id or not content_type:
-            return Response({"error": "User ID, content ID, and content type are required."}, status=status.HTTP_400_BAD_REQUEST)
-
+        if not user_id or not content_type:
+            return Response({"error": "User ID and content type are required."}, status=status.HTTP_400_BAD_REQUEST)
         try:
             user = UserSession.objects.get(user_id=user_id)
             UserBookmark.objects.create(user=user, content_id=video_content_id, content_type=content_type)
             return Response({"message": "Bookmark added successfully."}, status=status.HTTP_201_CREATED)
         except UserSession.DoesNotExist:
             return Response({"error": "User session not found."}, status=status.HTTP_400_BAD_REQUEST)
-        
-
+    
     def get(self, request):
         user_id = request.query_params.get("user_id")
-
         if not user_id:
             return Response({"error": "User ID is required."}, status=status.HTTP_400_BAD_REQUEST)
-
         try:
             user = UserSession.objects.get(user_id=user_id)
             bookmarks = UserBookmark.objects.filter(user=user)
@@ -170,7 +149,6 @@ class UserBookmarkViewVideo(APIView):
         except UserSession.DoesNotExist:
             return Response({"error": "User session not found."}, status=status.HTTP_400_BAD_REQUEST)
 
-        
 # ---- WrittenContent Endpoints ----
 class WrittenContentPostView(APIView):
     def post(self, request):
@@ -198,10 +176,8 @@ class WrittenContentCommentView(APIView):
     def post(self, request, written_content_id):
         user_id = request.data.get("user_id")
         text = request.data.get("text")
-
         if not user_id or not text:
             return Response({"error": "User ID and comment text are required."}, status=status.HTTP_400_BAD_REQUEST)
-
         try:
             user = UserSession.objects.get(user_id=user_id)
             WrittenContentComment.objects.create(user=user, written_content_id=written_content_id, text=text)
@@ -209,14 +185,11 @@ class WrittenContentCommentView(APIView):
         except UserSession.DoesNotExist:
             return Response({"error": "User session not found."}, status=status.HTTP_400_BAD_REQUEST)
 
-
 class WrittenContentLikeView(APIView):
     def post(self, request, written_content_id):
         user_id = request.data.get("user_id")
-
         if not user_id:
             return Response({"error": "User ID is required."}, status=status.HTTP_400_BAD_REQUEST)
-
         try:
             user = UserSession.objects.get(user_id=user_id)
             WrittenContentLike.objects.create(user=user, written_content_id=written_content_id)
@@ -224,22 +197,18 @@ class WrittenContentLikeView(APIView):
         except UserSession.DoesNotExist:
             return Response({"error": "User session not found."}, status=status.HTTP_400_BAD_REQUEST)
 
-
 class WrittenContentShareView(APIView):
     def post(self, request, written_content_id):
         user_id = request.data.get("user_id")
         platform = request.data.get("platform", "Unknown")
-
         if not user_id:
             return Response({"error": "User ID is required."}, status=status.HTTP_400_BAD_REQUEST)
-
         try:
             user = UserSession.objects.get(user_id=user_id)
             WrittenContentShare.objects.create(user=user, written_content_id=written_content_id, platform=platform)
             return Response({"message": "Share added successfully."}, status=status.HTTP_201_CREATED)
         except UserSession.DoesNotExist:
             return Response({"error": "User session not found."}, status=status.HTTP_400_BAD_REQUEST)
-
 
 # ---- WrittenImageContent Endpoints ----
 class WrittenImageContentPostView(APIView):
@@ -268,10 +237,8 @@ class WrittenImageContentCommentView(APIView):
     def post(self, request, written_image_content_id):
         user_id = request.data.get("user_id")
         text = request.data.get("text")
-
         if not user_id or not text:
             return Response({"error": "User ID and comment text are required."}, status=status.HTTP_400_BAD_REQUEST)
-
         try:
             user = UserSession.objects.get(user_id=user_id)
             WrittenImageContentComment.objects.create(user=user, written_image_content_id=written_image_content_id, text=text)
@@ -282,10 +249,8 @@ class WrittenImageContentCommentView(APIView):
 class WrittenImageContentLikeView(APIView):
     def post(self, request, written_image_content_id):
         user_id = request.data.get("user_id")
-
         if not user_id:
             return Response({"error": "User ID is required."}, status=status.HTTP_400_BAD_REQUEST)
-
         try:
             user = UserSession.objects.get(user_id=user_id)
             WrittenImageContentLike.objects.create(user=user, written_image_content_id=written_image_content_id)
@@ -293,23 +258,18 @@ class WrittenImageContentLikeView(APIView):
         except UserSession.DoesNotExist:
             return Response({"error": "User session not found."}, status=status.HTTP_400_BAD_REQUEST)
 
-
 class WrittenImageContentShareView(APIView):
     def post(self, request, written_image_content_id):
         user_id = request.data.get("user_id")
         platform = request.data.get("platform", "Unknown")
-
         if not user_id:
             return Response({"error": "User ID is required."}, status=status.HTTP_400_BAD_REQUEST)
-
         try:
             user = UserSession.objects.get(user_id=user_id)
             WrittenImageContentShare.objects.create(user=user, written_image_content_id=written_image_content_id, platform=platform)
             return Response({"message": "Share added successfully."}, status=status.HTTP_201_CREATED)
         except UserSession.DoesNotExist:
             return Response({"error": "User session not found."}, status=status.HTTP_400_BAD_REQUEST)
-
-
 
 # ---- VideoContent Endpoints ----
 class VideoContentPostView(APIView):
@@ -334,14 +294,11 @@ class VideoContentCommentView(APIView):
             return Response(serializer.data, status=status.HTTP_200_OK)
         except Exception as e:
             return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
-
     def post(self, request, video_content_id):
         user_id = request.data.get("user_id")
         text = request.data.get("text")
-
         if not user_id or not text:
             return Response({"error": "User ID and comment text are required."}, status=status.HTTP_400_BAD_REQUEST)
-
         try:
             user = UserSession.objects.get(user_id=user_id)
             VideoContentComment.objects.create(user=user, video_content_id=video_content_id, text=text)
@@ -349,14 +306,11 @@ class VideoContentCommentView(APIView):
         except UserSession.DoesNotExist:
             return Response({"error": "User session not found."}, status=status.HTTP_400_BAD_REQUEST)
 
-
 class VideoContentLikeView(APIView):
     def post(self, request, video_content_id):
         user_id = request.data.get("user_id")
-
         if not user_id:
             return Response({"error": "User ID is required."}, status=status.HTTP_400_BAD_REQUEST)
-
         try:
             user = UserSession.objects.get(user_id=user_id)
             VideoContentLike.objects.create(user=user, video_content_id=video_content_id)
@@ -368,10 +322,8 @@ class VideoContentShareView(APIView):
     def post(self, request, video_content_id):
         user_id = request.data.get("user_id")
         platform = request.data.get("platform", "Unknown")
-
         if not user_id:
             return Response({"error": "User ID is required."}, status=status.HTTP_400_BAD_REQUEST)
-
         try:
             user = UserSession.objects.get(user_id=user_id)
             VideoContentShare.objects.create(user=user, video_content_id=video_content_id, platform=platform)
