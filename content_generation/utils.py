@@ -8,7 +8,7 @@ def generate_content_from_prompt(prompt_text, temperature=0.7, token_limit=256):
     """
     openai.api_key = settings.OPENAI_API_KEY
     response = openai.ChatCompletion.create(
-        model="gpt-4o",  # Use a model with search capability if needed
+        model="gpt-4.1",  # Use a model with search capability if needed
         messages=[
             {"role": "system", "content": "You are a helpful news generator."},
             {"role": "user", "content": prompt_text}
