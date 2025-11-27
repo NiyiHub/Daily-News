@@ -1,4 +1,4 @@
-from django.urls import path 
+from django.urls import path, include 
 from .views import (
     UserLoginView,
     UserSessionView,
@@ -64,4 +64,6 @@ urlpatterns = [
     path('bookmarks/<str:user_id>/', UserBookmarkViewWritten.as_view(), name='get_user_bookmarks'),
     path('bookmarks/<str:user_id>/', UserBookmarkViewWrittenImage.as_view(), name='get_user_bookmarks'),
     path('bookmarks/<str:user_id>/', UserBookmarkViewVideo.as_view(), name='get_user_bookmarks'),
+
+    path('ckeditor/', include('ckeditor_uploader.urls')),
 ]

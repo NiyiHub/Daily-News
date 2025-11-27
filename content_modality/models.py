@@ -2,8 +2,8 @@ from django.db import models
 from content_processing.models import PublishedContent
 import uuid
 from django.utils.timezone import now
+from ckeditor.fields import RichTextField 
 
-# Predefined category choices
 CATEGORY_CHOICES = [
     ('US', 'U.S'),
     ('WORLD', 'World'),
@@ -68,7 +68,7 @@ class WrittenContent(models.Model):
         related_name="written_content"
     )
     title = models.CharField(max_length=999)  
-    content = models.TextField(max_length=5000)  
+    content = RichTextField(max_length=5000)  # Changed to RichTextField
     created_at = models.DateTimeField(auto_now_add=True)
     category = models.CharField(max_length=20, choices=CATEGORY_CHOICES, default='US')
 
@@ -102,7 +102,7 @@ class WrittenImageContent(models.Model):
         related_name="written_image_content"
     )
     title = models.CharField(max_length=999)  
-    content = models.TextField(max_length=5000)  
+    content = RichTextField(max_length=5000)  # Changed to RichTextField
     image_url = models.URLField(null=True, blank=True)  
     created_at = models.DateTimeField(auto_now_add=True)
     category = models.CharField(max_length=20, choices=CATEGORY_CHOICES, default='US')
@@ -138,7 +138,7 @@ class VideoContent(models.Model):
     )
     title = models.CharField(max_length=999)  
     video_url = models.URLField(null=True, blank=True)  
-    summary = models.TextField(max_length=200)  
+    summary = RichTextField(max_length=200)  # Changed to RichTextField
     created_at = models.DateTimeField(auto_now_add=True)
     category = models.CharField(max_length=20, choices=CATEGORY_CHOICES, default='US')
 
