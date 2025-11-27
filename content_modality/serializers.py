@@ -1,4 +1,6 @@
 from rest_framework import serializers
+from django.utils.html import strip_tags
+import html
 from .models import (
     UserSession,
     
@@ -45,9 +47,31 @@ class WrittenContentSerializer(serializers.ModelSerializer):
     likes = WrittenContentLikeSerializer(many=True, read_only=True)
     comments = WrittenContentCommentSerializer(many=True, read_only=True)
     shares = WrittenContentShareSerializer(many=True, read_only=True)
+    
+    # Add dual format fields
+    content_html = serializers.CharField(source='content', read_only=True)
+    content_plain = serializers.SerializerMethodField()
+    
     class Meta:
         model = WrittenContent
-        fields = ['id', 'published_content', 'title', 'content', 'created_at', 'category', 'likes', 'comments', 'shares']
+        fields = [
+            'id', 
+            'published_content', 
+            'title', 
+            'content',           # Original field (kept for backward compatibility)
+            'content_html',      # Rich text with HTML tags
+            'content_plain',     # Plain text without HTML
+            'created_at', 
+            'category', 
+            'likes', 
+            'comments', 
+            'shares'
+        ]
+    
+    def get_content_plain(self, obj):
+        """Strip HTML tags and decode HTML entities like &ndash; &rsquo; etc."""
+        plain = strip_tags(obj.content)
+        return html.unescape(plain)
 
 # --- Serializers for WrittenImageContent Interactive Features ---
 class WrittenImageContentLikeSerializer(serializers.ModelSerializer):
@@ -71,9 +95,32 @@ class WrittenImageContentSerializer(serializers.ModelSerializer):
     likes = WrittenImageContentLikeSerializer(many=True, read_only=True)
     comments = WrittenImageContentCommentSerializer(many=True, read_only=True)
     shares = WrittenImageContentShareSerializer(many=True, read_only=True)
+    
+    # Add dual format fields
+    content_html = serializers.CharField(source='content', read_only=True)
+    content_plain = serializers.SerializerMethodField()
+    
     class Meta:
         model = WrittenImageContent
-        fields = ['id', 'published_content', 'title', 'content', 'image_url', 'created_at', 'category', 'likes', 'comments', 'shares']
+        fields = [
+            'id', 
+            'published_content', 
+            'title', 
+            'content',           # Original field (kept for backward compatibility)
+            'content_html',      # Rich text with HTML tags
+            'content_plain',     # Plain text without HTML
+            'image_url', 
+            'created_at', 
+            'category', 
+            'likes', 
+            'comments', 
+            'shares'
+        ]
+    
+    def get_content_plain(self, obj):
+        """Strip HTML tags and decode HTML entities like &ndash; &rsquo; etc."""
+        plain = strip_tags(obj.content)
+        return html.unescape(plain)
 
 # --- Serializers for VideoContent Interactive Features ---
 class VideoContentLikeSerializer(serializers.ModelSerializer):
@@ -97,6 +144,29 @@ class VideoContentSerializer(serializers.ModelSerializer):
     likes = VideoContentLikeSerializer(many=True, read_only=True)
     comments = VideoContentCommentSerializer(many=True, read_only=True)
     shares = VideoContentShareSerializer(many=True, read_only=True)
+    
+    # Add dual format fields
+    summary_html = serializers.CharField(source='summary', read_only=True)
+    summary_plain = serializers.SerializerMethodField()
+    
     class Meta:
         model = VideoContent
-        fields = ['id', 'published_content', 'title', 'video_url', 'summary', 'created_at', 'category', 'likes', 'comments', 'shares']
+        fields = [
+            'id', 
+            'published_content', 
+            'title', 
+            'video_url', 
+            'summary',           # Original field (kept for backward compatibility)
+            'summary_html',      # Rich text with HTML tags
+            'summary_plain',     # Plain text without HTML
+            'created_at', 
+            'category', 
+            'likes', 
+            'comments', 
+            'shares'
+        ]
+    
+    def get_summary_plain(self, obj):
+        """Strip HTML tags and decode HTML entities like &ndash; &rsquo; etc."""
+        plain = strip_tags(obj.summary)
+        return html.unescape(plain)
