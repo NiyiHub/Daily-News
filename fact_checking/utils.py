@@ -10,7 +10,7 @@ def query_google_fact_check(claim):
     Returns:
         dict: {
             'textual_rating': <str>,
-            'evidence': <evidence details (e.g., URL or list of URLs)>,
+            'evidence': <dict with structured evidence>,
             'verification_score': <float>
         }
     """
@@ -26,25 +26,42 @@ def query_google_fact_check(claim):
 
         # Default values if no claims found
         textual_rating = "Unverified"
-        evidence = None
+        evidence = {}  # ✅ FIXED: Now returns dict instead of None/string
         verification_score = 0.0
 
         if 'claims' in data and data['claims']:
             # Get the first claimReview if available
             claim_reviews = data['claims'][0].get('claimReview', [])
             if claim_reviews:
-                textual_rating = claim_reviews[0].get('textualRating', "Unverified")
+                first_review = claim_reviews[0]
+                textual_rating = first_review.get('textualRating', "Unverified")
+                
+                # ✅ FIXED: Structure evidence as object matching frontend expectations
+                evidence = {
+                    "url": first_review.get('url', ''),
+                    "source": first_review.get('publisher', {}).get('name', 'Unknown Source'),
+                    "summary": first_review.get('title', 'No summary available'),
+                    "verification_status": textual_rating,
+                    "supporting_documents": [
+                        {
+                            "url": first_review.get('url', ''),
+                            "title": first_review.get('title', 'Source Document')
+                        }
+                    ] if first_review.get('url') else []
+                }
+                
                 # Compute a simple verification score based on textual_rating
-                # For example: "TRUE" -> 1.0, "Mostly True" -> 0.8, "Mostly False" -> 0.2, "FALSE" -> 0.0
                 rating_map = {
                     "TRUE": 1.0,
+                    "True": 1.0,
                     "Mostly True": 0.8,
                     "Partly True": 0.5,
                     "Mostly False": 0.2,
-                    "FALSE": 0.0
+                    "FALSE": 0.0,
+                    "False": 0.0
                 }
                 verification_score = rating_map.get(textual_rating, 0.0)
-                evidence = claim_reviews[0].get('url', "")
+                
         return {
             'textual_rating': textual_rating,
             'evidence': evidence,
@@ -55,7 +72,7 @@ def query_google_fact_check(claim):
         print("Google Fact Check API error:", e)
         return {
             'textual_rating': "Error",
-            'evidence': None,
+            'evidence': {},  # ✅ Return empty dict on error
             'verification_score': 0.0
         }
 
@@ -71,7 +88,7 @@ def process_fact_check_manual(claim):
     fact_check_result = FactCheckResult.objects.create(
         claim=claim,
         textual_rating=result.get('textual_rating', "Unverified"),
-        evidence=result.get('evidence'),
+        evidence=result.get('evidence', {}),  # ✅ Now stores structured dict
         verification_score=result.get('verification_score', 0.0)
     )
     return fact_check_result
