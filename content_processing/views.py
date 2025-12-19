@@ -77,6 +77,65 @@ class PublishedContentEvidenceView(APIView):
         except Exception as e:
             return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
+# ✅ NEW VIEW: Get evidence by news article ID instead of PublishedContent ID
+class NewsArticleEvidenceView(APIView):
+    """
+    API view to retrieve evidence for a news article by its ID.
+    This maps the news article ID to the corresponding PublishedContent and returns evidence.
+    GET: Returns the evidence data or 404 if not found.
+    """
+    def get(self, request, news_id):
+        try:
+            # Import here to avoid circular imports
+            from content_generation.models import GeneratedContent
+            
+            # Find the GeneratedContent by news_id
+            generated_content = GeneratedContent.objects.get(id=news_id)
+            
+            # Check if it has been processed
+            if not hasattr(generated_content, 'processed_content'):
+                return Response({
+                    "error": "No evidence available",
+                    "message": "This article has not been fact-checked yet."
+                }, status=status.HTTP_404_NOT_FOUND)
+            
+            processed_content = generated_content.processed_content
+            
+            # Check if it has been published
+            if not hasattr(processed_content, 'published_content'):
+                return Response({
+                    "error": "No evidence available",
+                    "message": "This article has not been published yet."
+                }, status=status.HTTP_404_NOT_FOUND)
+            
+            published_content = processed_content.published_content
+            
+            # Check if evidence exists and is not empty
+            if not published_content.evidence or published_content.evidence == {}:
+                return Response({
+                    "error": "No evidence available",
+                    "message": "No verification evidence is available for this article.",
+                    "has_evidence": False
+                }, status=status.HTTP_404_NOT_FOUND)
+            
+            # Return evidence data
+            return Response({
+                "evidence": published_content.evidence,
+                "fact_check_status": published_content.fact_check_status,
+                "has_evidence": True
+            }, status=status.HTTP_200_OK)
+            
+        except GeneratedContent.DoesNotExist:
+            return Response({
+                "error": "Article not found",
+                "message": "The requested article does not exist."
+            }, status=status.HTTP_404_NOT_FOUND)
+        except Exception as e:
+            return Response({
+                "error": "Server error",
+                "message": str(e)
+            }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
 class CategoryDetailView(APIView):
     """
     API view to retrieve categories for a specific ProcessedContent instance.

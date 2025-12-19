@@ -138,7 +138,7 @@ class VideoContent(models.Model):
     )
     title = models.CharField(max_length=999)  
     video_url = models.URLField(null=True, blank=True)  
-    summary = RichTextField(max_length=200)  # Changed to RichTextField
+    summary = RichTextField(max_length=1000)  # Changed to RichTextField
     created_at = models.DateTimeField(auto_now_add=True)
     category = models.CharField(max_length=20, choices=CATEGORY_CHOICES, default='US')
 
