@@ -52,11 +52,16 @@ class WrittenContentSerializer(serializers.ModelSerializer):
     content_html = serializers.CharField(source='content', read_only=True)
     content_plain = serializers.SerializerMethodField()
     
+    # ✅ NEW: Add generated_content_id for evidence lookup
+    # This traverses: WrittenContent → PublishedContent → ProcessedContent → GeneratedContent
+    generated_content_id = serializers.SerializerMethodField()
+    
     class Meta:
         model = WrittenContent
         fields = [
             'id', 
-            'published_content', 
+            'published_content',
+            'generated_content_id',  # ✅ NEW: For evidence endpoint
             'title', 
             'content',           # Original field (kept for backward compatibility)
             'content_html',      # Rich text with HTML tags
@@ -72,6 +77,21 @@ class WrittenContentSerializer(serializers.ModelSerializer):
         """Strip HTML tags and decode HTML entities like &ndash; &rsquo; etc."""
         plain = strip_tags(obj.content)
         return html.unescape(plain)
+    
+    def get_generated_content_id(self, obj):
+        """
+        Get the GeneratedContent ID for evidence lookup.
+        Relationship chain: WrittenContent → PublishedContent → ProcessedContent → GeneratedContent
+        """
+        try:
+            # Navigate through the relationships
+            published = obj.published_content
+            processed = published.processed_content
+            generated = processed.content
+            return generated.id
+        except AttributeError:
+            # If any relationship is missing, return None
+            return None
 
 # --- Serializers for WrittenImageContent Interactive Features ---
 class WrittenImageContentLikeSerializer(serializers.ModelSerializer):
@@ -100,11 +120,15 @@ class WrittenImageContentSerializer(serializers.ModelSerializer):
     content_html = serializers.CharField(source='content', read_only=True)
     content_plain = serializers.SerializerMethodField()
     
+    # ✅ NEW: Add generated_content_id for evidence lookup
+    generated_content_id = serializers.SerializerMethodField()
+    
     class Meta:
         model = WrittenImageContent
         fields = [
             'id', 
-            'published_content', 
+            'published_content',
+            'generated_content_id',  # ✅ NEW: For evidence endpoint
             'title', 
             'content',           # Original field (kept for backward compatibility)
             'content_html',      # Rich text with HTML tags
@@ -121,6 +145,16 @@ class WrittenImageContentSerializer(serializers.ModelSerializer):
         """Strip HTML tags and decode HTML entities like &ndash; &rsquo; etc."""
         plain = strip_tags(obj.content)
         return html.unescape(plain)
+    
+    def get_generated_content_id(self, obj):
+        """Get the GeneratedContent ID for evidence lookup."""
+        try:
+            published = obj.published_content
+            processed = published.processed_content
+            generated = processed.content
+            return generated.id
+        except AttributeError:
+            return None
 
 # --- Serializers for VideoContent Interactive Features ---
 class VideoContentLikeSerializer(serializers.ModelSerializer):
@@ -149,11 +183,15 @@ class VideoContentSerializer(serializers.ModelSerializer):
     summary_html = serializers.CharField(source='summary', read_only=True)
     summary_plain = serializers.SerializerMethodField()
     
+    # ✅ NEW: Add generated_content_id for evidence lookup
+    generated_content_id = serializers.SerializerMethodField()
+    
     class Meta:
         model = VideoContent
         fields = [
             'id', 
-            'published_content', 
+            'published_content',
+            'generated_content_id',  # ✅ NEW: For evidence endpoint
             'title', 
             'video_url', 
             'summary',           # Original field (kept for backward compatibility)
@@ -170,3 +208,13 @@ class VideoContentSerializer(serializers.ModelSerializer):
         """Strip HTML tags and decode HTML entities like &ndash; &rsquo; etc."""
         plain = strip_tags(obj.summary)
         return html.unescape(plain)
+    
+    def get_generated_content_id(self, obj):
+        """Get the GeneratedContent ID for evidence lookup."""
+        try:
+            published = obj.published_content
+            processed = published.processed_content
+            generated = processed.content
+            return generated.id
+        except AttributeError:
+            return None
