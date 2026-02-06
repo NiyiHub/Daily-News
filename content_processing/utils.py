@@ -41,48 +41,65 @@ def tag_content(text):
     unique_tags = list(dict.fromkeys(tags))
     return unique_tags[:10]
 
-# def process_generated_content(generated_instance):
-#     """
-#     Process a GeneratedContent instance:
-#       - Categorize the content.
-#       - Extract tags.
-#       - Create a ProcessedContent record.
-#     This function is triggered automatically via a post_save signal in content_generation.
-#     """
-#     from .models import ProcessedContent  # Import here to avoid circular dependencies
-#     categories = categorize_content(generated_instance.body)
-#     tags = tag_content(generated_instance.body)
-#     # Create ProcessedContent; fact-check data and publish_status will be computed in its save() method.
-#     ProcessedContent.objects.create(
-#         content=generated_instance,
-#         categories=categories,
-#         tags=tags
-#     )
-
 def process_generated_content(generated_instance):
+    """
+    Process a GeneratedContent instance:
+      - Categorize the content.
+      - Extract tags.
+      - Create a ProcessedContent record.
+      - Automatically create PublishedContent if fact_check_status is "unverified"
+    
+    Note: This function is called by a signal from content_generation app.
+    The signal in models.py (trigger_publication) will also try to create PublishedContent,
+    so we use get_or_create to prevent duplicates.
+    """
     try:
         with transaction.atomic():
-            print(f"Processing content: {generated_instance.title}")
+            print(f"[PROCESS] Starting processing for: {generated_instance.title} (ID: {generated_instance.id})")
 
+            # Check if already processed to avoid duplicates
+            if hasattr(generated_instance, 'processed_content'):
+                print(f"[PROCESS] Content already processed, skipping...")
+                return generated_instance.processed_content
+
+            # Categorize and tag the content
             categories = categorize_content(generated_instance.body)
             tags = tag_content(generated_instance.body)
+            print(f"[PROCESS] Categories: {categories}, Tags: {tags[:3]}...")
+
+            # Look for fact check result
             fact_check = FactCheckResult.objects.filter(claim=generated_instance.body).first()
+            
+            if fact_check:
+                print(f"[PROCESS] Fact check found: {fact_check.textual_rating}")
+                fact_check_status = fact_check.textual_rating
+                composite_score = fact_check.verification_score
+                evidence = fact_check.evidence if fact_check.evidence else {}
+            else:
+                print(f"[PROCESS] No fact check found, defaulting to Unverified")
+                fact_check_status = "Unverified"
+                composite_score = 0.0
+                evidence = {}
 
-            # Ensure ProcessedContent exists or create it
-            processed, created = ProcessedContent.objects.get_or_create(
+            # Create ProcessedContent
+            # Note: The save() method in ProcessedContent model will also fetch fact_check
+            # and set publish_status, but we're being explicit here
+            processed = ProcessedContent.objects.create(
                 content=generated_instance,
-                defaults={
-                    "categories": categories,
-                    "tags": tags,
-                    "fact_check_status": fact_check.textual_rating if fact_check else "Unverified",
-                    "composite_score": fact_check.verification_score if fact_check else 0.0,
-                    "evidence": fact_check.evidence if fact_check and fact_check.evidence else {}
-                }
+                categories=categories,
+                tags=tags,
+                # These will be overridden by the save() method, but setting them anyway
+                fact_check_status=fact_check_status,
+                composite_score=composite_score,
+                evidence=evidence
             )
+            print(f"[PROCESS] ProcessedContent created (ID: {processed.id})")
+            print(f"[PROCESS] Publish status: {processed.publish_status}")
 
-            print(f"Processed content saved: {processed}")
-
-            # Ensure only one PublishedContent entry exists
+            # The post_save signal (trigger_publication) in models.py will handle
+            # PublishedContent creation, so we DON'T create it here to avoid duplicates
+            # If for some reason you want to ensure it's created, use get_or_create:
+            
             if processed.fact_check_status.lower() == "unverified":
                 published, created = PublishedContent.objects.get_or_create(
                     processed_content=processed,
@@ -95,9 +112,17 @@ def process_generated_content(generated_instance):
                     }
                 )
                 if created:
-                    print("Published content created.")
+                    print(f"[PROCESS] PublishedContent created (ID: {published.id})")
                 else:
-                    print("Published content already exists, skipping creation.")
+                    print(f"[PROCESS] PublishedContent already exists (ID: {published.id})")
+            else:
+                print(f"[PROCESS] Content withheld from publication (status: {processed.fact_check_status})")
+
+            print(f"[PROCESS] Processing complete for article ID {generated_instance.id}")
+            return processed
 
     except Exception as e:
-        print(f"Error processing content: {e}")
+        print(f"[PROCESS ERROR] Failed to process content: {type(e).__name__}: {str(e)}")
+        import traceback
+        traceback.print_exc()
+        raise  # Re-raise to see the full error in logs
