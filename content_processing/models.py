@@ -67,10 +67,16 @@ class PublishedContent(models.Model):
 
     def save(self, *args, **kwargs):
         """
-        Populate evidence from ProcessedContent if not manually overridden.
+        ✅ FIXED: Only populate evidence from ProcessedContent on creation,
+        not on every save. This preserves manually-added evidence.
         """
-        if not self.manually_overridden and self.processed_content:
-            self.evidence = self.processed_content.evidence
+        # Only auto-populate evidence if this is a new record AND no evidence has been set
+        if self.pk is None and not self.evidence:
+            # This is a new record being created
+            if self.processed_content and self.processed_content.evidence:
+                self.evidence = self.processed_content.evidence
+        # If manually_overridden is explicitly set, don't touch evidence
+        # Otherwise, evidence is preserved as-is
         super(PublishedContent, self).save(*args, **kwargs)
 
     def __str__(self):
