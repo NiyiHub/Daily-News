@@ -50,6 +50,7 @@ def query_google_fact_check(claim):
                         }
                     ],
                     "verification_status": textual_rating,
+                    "correctness_score": verification_score,
                     "what's_accurate": first_review.get('title', 'No accuracy details available'),
                     "what's_not": first_review.get('title', 'No inaccuracy details available'),
                     "supporting_documents": [
