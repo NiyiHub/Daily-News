@@ -41,7 +41,17 @@ def query_google_fact_check(claim):
                     "url": first_review.get('url', ''),
                     "source": first_review.get('publisher', {}).get('name', 'Unknown Source'),
                     "summary": first_review.get('title', 'No summary available'),
+                    "details": [
+                        {
+                            "clarity": first_review.get('title', 'No details available'),
+                            "accuracy": first_review.get('textualRating', 'No rating available'),
+                            "disclosure": first_review.get('title', 'No disclosure available'),
+                            "source_identification": first_review.get('title', 'No source identification available')
+                        }
+                    ],
                     "verification_status": textual_rating,
+                    "what's_accurate": first_review.get('title', 'No accuracy details available'),
+                    "what's_not": first_review.get('title', 'No inaccuracy details available'),
                     "supporting_documents": [
                         {
                             "url": first_review.get('url', ''),
